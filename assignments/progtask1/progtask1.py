@@ -9,7 +9,7 @@ eps = 0.001 # Default epsilon value
 while True: # Read a matrix until the epsilon is given
     inputVector = list(map(float, input().split()))
     A.append(inputVector)
-    if len(inputVector) <= 1 and len(A) > 2:
+    if len(inputVector) <= 1 and len(A) > 2: # "> 2" is here to make sure we don't confuse b with eps
         if len(inputVector) == 1: eps = A.pop()[0]
         else: A.pop()
 
@@ -34,8 +34,6 @@ def print_problem(is_max_problem):
 
         print(f" <= {b[i]}", end="")
 
-print_problem(True)
-
 # Function to form a table
 def form_tableau(is_max_problem):
     if is_max_problem:
@@ -57,4 +55,9 @@ def form_tableau(is_max_problem):
 
     return tableau
 
-form_tableau(True)
+# Check the data on dimension correctness
+def check_dimension_correctness():
+    if len(A) != len(b): return False
+    for i in A:
+        if len(i) != len(C): return False
+    return True
