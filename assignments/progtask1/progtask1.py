@@ -1,20 +1,12 @@
-# Input processor
-
-C = list(map(float, input().split()))
-
-A = []
-
-eps = 0.001 # Default epsilon value
-
-while True: # Read a matrix until the epsilon is given
-    inputVector = list(map(float, input().split()))
-    A.append(inputVector)
-    if len(inputVector) <= 1 and len(A) > 2: # "> 2" is here to make sure we don't confuse b with eps
-        if len(inputVector) == 1: eps = A.pop()[0]
-        else: A.pop()
-
-        b = A.pop()
-        break
+#while True: # Read a matrix until the epsilon is given
+#    inputVector = list(map(float, input().split()))
+#    A.append(inputVector)
+#    if len(inputVector) <= 1 and len(A) > 2: # "> 2" is here to make sure we don't confuse b with eps
+#        if len(inputVector) == 1: eps = A.pop()[0]
+#        else: A.pop()
+#
+#        b = A.pop()
+#        break
 
 # Print the initial problem function
 def print_problem(is_max_problem):
@@ -61,3 +53,34 @@ def check_dimension_correctness():
     for i in A:
         if len(i) != len(C): return False
     return True
+
+def minimal(list):
+    min=0
+    for i in range(list):
+        if list[min]<list[i]: min = i
+    if list[min]<0: return min
+    else: return -1
+
+def relations(tableu, ind):
+    min=100000
+    indVar=0
+    for i in range(len(tableu)):
+        if tableu[i][ind]<0: continue
+        x=tableu[i][len(tableu[i])]/tableu[i][ind]
+        if 0<x<min: 
+            indVar=i
+            min=x
+    if min==100000:
+        return -1
+
+def simplex(tableu):
+    min = minimal(tableu[0])
+    while min!=-1:
+        ind = relations(tableu,min)
+
+        min = minimal(tableu[0])
+
+A = []
+
+eps = 0.001 # Default epsilon value
+
