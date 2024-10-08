@@ -9,8 +9,8 @@
 #        break
 
 # Print the initial problem function
-def print_problem(is_max_problem):
-    print(f"{"max" if is_max_problem else "min"} z = ", end="") # Target function line
+def print_problem(C,A,b,flag):
+    print(f"{"max" if flag else "min"} z = ", end="") # Target function line
 
     print(f"{C[0]} * x1", end="")
     for i in range(1, len(C)):
@@ -25,10 +25,11 @@ def print_problem(is_max_problem):
             print(f" {"+" if A[i][j] >= 0 else "-"} {abs(A[i][j])} * x{j+1}", end="")
 
         print(f" <= {b[i]}", end="")
+    print("\n")
 
 # Function to form a table
-def form_tableau(is_max_problem):
-    if is_max_problem:
+def form_tableau(C,A,b,flag):
+    if flag:
         tableau = [[-i for i in C]]
     else:
         tableau = [C[:]] # Copy C into tableau in order to avoid modifications to C
@@ -65,22 +66,34 @@ def relations(tableu, ind):
     min=100000
     indVar=0
     for i in range(len(tableu)):
-        if tableu[i][ind]<0: continue
+        if tableu[i][ind]<=0: continue
         x=tableu[i][len(tableu[i])]/tableu[i][ind]
         if 0<x<min: 
             indVar=i
             min=x
-    if min==100000:
+    if indVar==0:
         return -1
+    else return
 
-def simplex(tableu):
-    min = minimal(tableu[0])
+def simplex(C,A,b,eps,flag):
+    # printing problem
+    print_problem(C,A,b,flag)
+
+    # forming tableu
+    tableau=form_tableau(C,A,b,flag)
+
+    # applying simplex
+    min = minimal(tableau[0])
     while min!=-1:
-        ind = relations(tableu,min)
+        ind = relations(tableau,min)
 
-        min = minimal(tableu[0])
+        min = minimal(tableau[0])
 
-A = []
+eps_def = 0.001 # Default epsilon value
 
-eps = 0.001 # Default epsilon value
-
+# first test
+C=[3,9]
+A=[ [1,4],
+    [1,2]]
+b=[8,4]
+simplex(C,A,b,eps_def,True)
