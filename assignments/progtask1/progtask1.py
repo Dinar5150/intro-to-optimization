@@ -85,11 +85,19 @@ def simplex(C,A,b,eps,flag):
 
     # forming tableu
     tableau=form_tableau(C,A,b,flag)
+    ans=[0]*len(C)
 
     # applying simplex
     en = minimal(tableau[0])
     while en!=-1:
         out = relations(tableau,en)
+        if out in ans:
+            for i in range(len(ans)):
+                if ans[i]==out:
+                    ans[i]=0
+                    break
+        if 0<=en<len(C):ans[en]=out
+
         if out==0:
             print("Unboundness!\nSimplex is not applicable\n")
             return ["unbounded",[],[]]
@@ -98,33 +106,40 @@ def simplex(C,A,b,eps,flag):
 
         en = minimal(tableau[0])
     if flag==False: tableau[0][-1]=-1*tableau[0][-1]
-    return ['solved',tableau[0][0:len(C):],tableau[0][-1]]
+
+    # returning ans
+    for i in range(len(ans)):
+        if ans[i]>0:
+            ans[i]=tableau[ans[i]][-1]
+    return ['solved',ans,tableau[0][-1]]
 
 eps_def = 0.001 # Default epsilon value
 
 # first test
-print("first test")
-C=[3,9]
-A=[ [1,4],
-    [1,2]]
-b=[8,4]
-print(simplex(C,A,b,eps_def,True))
-
-# second test
-print("\nsecond test")
-C=[2,4]
-A=[ [1,2],
-    [1,1]]
-b=[5,4]
-print(simplex(C,A,b,eps_def,True))
-
-# third test
-print("\nthird test")
+print("\nfirst test")
 C=[2,1]
 A=[ [1,-1],
     [2,0]]
-print(simplex(C,A,b,eps_def,True))
 b=[8,4]
+print(simplex(C,A,b,eps_def,True))
+
+#second test
+print("\nsecond test")
+C = [4, 1, 3, 5]
+A = [[-4, 6, 5, 4],
+    [-3, -2, 4, 1],
+    [-8, -3, 3, 2]]
+b = [20, 10, 20]
+print(simplex(C,A,b,eps_def,True))
+
+#third test
+print("\nthird test")
+C = [3, 2, 5]
+A = [[1, 2, 1],
+    [3, 0, 2],
+    [1, 4, 0]]
+b = [430, 460, 420]
+print(simplex(C,A,b,eps_def,True))
 
 # fourth test
 print("\nfourth test")
