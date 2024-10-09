@@ -78,6 +78,16 @@ def iterate(tableau, en, out):
         k=tableau[i][en]/tableau[out][en]
         for j in range(len(tableau[i])):
             tableau[i][j]=tableau[i][j]-k*tableau[out][j]
+    k=tableau[out][en]
+    for i in range(len(tableau[out])):
+        tableau[out][i]=tableau[out][i]/k
+
+#def printTableau(tableau):
+#    print("\n--------------\n")
+#    for i in tableau:
+#        for j in i:
+#            print(j,end="\t")
+#        print("\n")
 
 def simplex(C,A,b,eps,flag):
     # printing problem
@@ -89,6 +99,7 @@ def simplex(C,A,b,eps,flag):
 
     # applying simplex
     en = minimal(tableau[0])
+#    printTableau(tableau)
     while en!=-1:
         out = relations(tableau,en)
         if out in ans:
@@ -105,6 +116,7 @@ def simplex(C,A,b,eps,flag):
             iterate(tableau, en, out)
 
         en = minimal(tableau[0])
+#        printTableau(tableau)
     if flag==False: tableau[0][-1]=-1*tableau[0][-1]
 
     # returning ans
@@ -121,7 +133,7 @@ C=[2,1]
 A=[ [1,-1],
     [2,0]]
 b=[8,4]
-print(simplex(C,A,b,eps_def,True))
+simplex(C,A,b,eps_def,True) # returns list [state(string), x*(array), z(float)]
 
 #second test
 print("\nsecond test")
@@ -130,7 +142,7 @@ A = [[-4, 6, 5, 4],
     [-3, -2, 4, 1],
     [-8, -3, 3, 2]]
 b = [20, 10, 20]
-print(simplex(C,A,b,eps_def,True))
+simplex(C,A,b,eps_def,True)
 
 #third test
 print("\nthird test")
@@ -139,7 +151,7 @@ A = [[1, 2, 1],
     [3, 0, 2],
     [1, 4, 0]]
 b = [430, 460, 420]
-print(simplex(C,A,b,eps_def,True))
+simplex(C,A,b,eps_def,True)
 
 # fourth test
 print("\nfourth test")
@@ -148,7 +160,7 @@ A=[ [18,15,12],
     [6,4,8],
     [5,3,3]]
 b=[360,192,180]
-print(simplex(C,A,b,eps_def,True))
+simplex(C,A,b,eps_def,True)
 
 # fifth test
 print("\nfifth test")
@@ -157,4 +169,4 @@ A=[ [2,1,-2],
     [1,2,4],
     [1,-1,2]]
 b=[24,23,10]
-print(simplex(C,A,b,eps_def,False))
+simplex(C,A,b,eps_def,False)
