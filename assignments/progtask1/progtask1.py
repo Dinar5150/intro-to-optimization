@@ -9,22 +9,21 @@
 #        break
 
 # Print the initial problem function
-def print_problem(C,A,b,flag):
+def print_problem(C, A, b, flag):
     # Target function line
-    print("z = ",end="")
+    print(f"{"max" if flag else "min"} z = ", end="")  # Target function line
     print(f"{C[0]} * x1", end="")
     for i in range(1, len(C)):
-        print(f" {"+" if C[i] >= 0 else "-"} {abs(C[i])} * x{i+1}", end="")
-    print(f"->{"max" if flag else "min"}",end="\n")
+        print(f" {"+" if C[i] >= 0 else "-"} {abs(C[i])} * x{i + 1}", end="")
 
-    print("subject to the constraints:", end="") # Constraints lines
+    print("\nsubject to the constraints:", end="")  # Constraints lines
     for i in range(len(A)):
-        print(f"\n\t{A[i][0]} * x1", end="")
+        print(f"\n - {A[i][0]} * x1", end="")
         for j in range(1, len(A[i])):
-            print(f" {"+" if A[i][j] >= 0 else "-"} {abs(A[i][j])} * x{j+1}", end="")
-
+            print(f" {"+" if A[i][j] >= 0 else "-"} {abs(A[i][j])} * x{j + 1}", end="")
         print(f" <= {b[i]}", end="")
-    print("\n")
+    print("\n", end="")
+
 
 # Function to form a table
 def form_tableau(C,A,b,flag):
@@ -54,6 +53,8 @@ def check_dimension_correctness():
         if len(i) != len(C): return False
     return True
 
+# print_problem(True)
+
 def minimal(list):
     min=0
     for i in range(len(list)):
@@ -62,25 +63,25 @@ def minimal(list):
     else: return -1
 
 def relations(tableau, ind):
-    min=100000
+    min = 10**20
     out=0
     for i in range(1,len(tableau)):
         if tableau[i][ind]<=0: continue
         x=tableau[i][-1]/tableau[i][ind]
-        if 0<x<min: 
-            out=i
-            min=x
+        if 0 < x < min:
+            out = i
+            min = x
     return out
 
 def iterate(tableau, en, out):
     for i in range(len(tableau)):
-        if i==out:continue
-        k=tableau[i][en]/tableau[out][en]
+        if i == out: continue
+        k = tableau[i][en] / tableau[out][en]
         for j in range(len(tableau[i])):
-            tableau[i][j]=tableau[i][j]-k*tableau[out][j]
-    k=tableau[out][en]
+            tableau[i][j] = tableau[i][j] - k * tableau[out][j]
+    k = tableau[out][en]
     for i in range(len(tableau[out])):
-        tableau[out][i]=tableau[out][i]/k
+        tableau[out][i] = tableau[out][i] / k
 
 #def printTableau(tableau):
 #    print("\n--------------\n")
@@ -89,54 +90,57 @@ def iterate(tableau, en, out):
 #            print(j,end="\t")
 #        print("\n")
 
-def simplex(C,A,b,eps,flag):
+def simplex(C, A, b, eps, flag):
     # printing problem
-    print_problem(C,A,b,flag)
+    print_problem(C, A, b, flag)
 
     # forming tableu
-    tableau=form_tableau(C,A,b,flag)
-    ans=[0]*len(C)
+    tableau=form_tableau(C, A, b, flag)
+    ans=[0] * len(C)
 
     # applying simplex
     en = minimal(tableau[0])
 #    printTableau(tableau)
-    while en!=-1:
+    print("solver_state: ", end="")
+    while en != -1:
         out = relations(tableau,en)
         if out in ans:
             for i in range(len(ans)):
                 if ans[i]==out:
                     ans[i]=0
                     break
-        if 0<=en<len(C):ans[en]=out
+        if 0 <= en < len(C): ans[en] = out
 
-        if out==0:
-            print("Unboundness!\nSimplex is not applicable\n")
+        if out == 0:
+            print("unbounded")
             return ["unbounded",[],[]]
         else:
             iterate(tableau, en, out)
 
         en = minimal(tableau[0])
 #        printTableau(tableau)
-    if flag==False: tableau[0][-1]=-1*tableau[0][-1]
+    if flag == False: tableau[0][-1]=-1*tableau[0][-1]
 
     # returning ans
     for i in range(len(ans)):
         if ans[i]>0:
             ans[i]=tableau[ans[i]][-1]
-    return ['solved',ans,tableau[0][-1]]
+    print("solved")
+    print("x*:", ans)
+    print("z:", tableau[0][-1])
 
 eps_def = 0.001 # Default epsilon value
 
 # first test
-print("\nfirst test")
+print("=== FIRST TEST ===")
 C=[2,1]
 A=[ [1,-1],
     [2,0]]
 b=[8,4]
-simplex(C,A,b,eps_def,True) # returns list [state(string), x*(array), z(float)]
+simplex(C, A, b, eps_def,True) # returns list [state(string), x*(array), z(float)]
 
 #second test
-print("\nsecond test")
+print("\n=== SECOND TEST ===")
 C = [4, 1, 3, 5]
 A = [[-4, 6, 5, 4],
     [-3, -2, 4, 1],
@@ -145,7 +149,7 @@ b = [20, 10, 20]
 simplex(C,A,b,eps_def,True)
 
 #third test
-print("\nthird test")
+print("\n=== THIRD TEST ===")
 C = [3, 2, 5]
 A = [[1, 2, 1],
     [3, 0, 2],
@@ -154,7 +158,7 @@ b = [430, 460, 420]
 simplex(C,A,b,eps_def,True)
 
 # fourth test
-print("\nfourth test")
+print("\n=== FOURTH TEST ===")
 C=[9,10,16]
 A=[ [18,15,12],
     [6,4,8],
@@ -163,10 +167,10 @@ b=[360,192,180]
 simplex(C,A,b,eps_def,True)
 
 # fifth test
-print("\nfifth test")
+print("\n=== FIFTH TEST ===")
 C=[-2,2,-6]
 A=[ [2,1,-2],
     [1,2,4],
     [1,-1,2]]
 b=[24,23,10]
-simplex(C,A,b,eps_def,False)
+simplex(C, A, b, eps_def,False)
