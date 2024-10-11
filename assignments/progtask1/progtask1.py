@@ -9,6 +9,8 @@
 #        b = A.pop()
 #        break
 
+EPS_DEF = 0.01
+
 # Function to print the initial problem
 def print_problem(C, A, b, is_max_problem):
     # Target function line
@@ -19,7 +21,7 @@ def print_problem(C, A, b, is_max_problem):
 
     print("\nsubject to the constraints:", end = "")  # Constraints lines
     for i in range(len(A)):
-        print(f"\n - {A[i][0]} * x1", end = "")
+        print(f"\n  {A[i][0]} * x1", end = "")
         for j in range(1, len(A[i])):
             print(f" {"+" if A[i][j] >= 0 else "-"} {abs(A[i][j])} * x{j + 1}", end = "")
         print(f" <= {b[i]}", end = "")
@@ -84,15 +86,15 @@ def iterate(tableau, en, out):
     for i in range(len(tableau[out])):
         tableau[out][i] = tableau[out][i] / k
 
-def simplex(C, A, b, eps, is_max_problem):
+def simplex(is_max_problem, C, A, b, eps = EPS_DEF):
     # Print the initial problem
     print_problem(C, A, b, is_max_problem)
 
     # Form the tableau for the simplex method
     tableau = form_tableau(C, A, b, is_max_problem)
-    ans=[0] * len(C)
+    ans = [0] * len(C)
 
-    prev_value = float('inf')  # Initialize previous optimal value as infinity
+    # prev_value = float('inf')  # Initialize previous optimal value as infinity (needed for the eps check block bellow)
 
     # Apply the simplex method
     entering_ind = find_ind_of_min_neg(tableau[0])
@@ -114,12 +116,14 @@ def simplex(C, A, b, eps, is_max_problem):
 
         entering_ind = find_ind_of_min_neg(tableau[0])
 
-        # Check the difference in the objective function value
-        current_value = tableau[0][-1]
-        if abs(current_value - prev_value) < eps:
-            break  # Stop the iteration if difference is below eps
+        # BLOCK TO CHECK THE EPS BETWEEN ITERATIONS AND BREAK IF NEEDED
 
-        prev_value = current_value  # Update for next iteration
+        # # Check the difference in the objective function value
+        # current_value = tableau[0][-1]
+        # if abs(current_value - prev_value) < eps:
+        #     break # Stop the iteration if difference is below eps
+        #
+        # prev_value = current_value  # Update for next iteration
 
     if not is_max_problem: tableau[0][-1] = -tableau[0][-1]
 
@@ -128,10 +132,8 @@ def simplex(C, A, b, eps, is_max_problem):
         if ans[i] > 0:
             ans[i] = tableau[ans[i]][-1]
     print("solved")
-    print("x*:", ans)
-    print("z:", tableau[0][-1])
-
-eps_def = 0.001 # Default epsilon value
+    print(f"x*: [{', '.join(str(round(i / eps) * eps) for i in ans)}]")
+    print("z:", round(tableau[0][-1] / eps) * eps)
 
 # first test
 print("=== FIRST TEST ===")
@@ -139,7 +141,7 @@ C=[2,1]
 A=[ [1,-1],
     [2,0]]
 b=[8,4]
-simplex(C, A, b, eps_def,True) # returns list [state(string), x*(array), z(float)]
+simplex(True, C, A, b) # returns list [state(string), x*(array), z(float)]
 
 #second test
 print("\n=== SECOND TEST ===")
@@ -148,7 +150,7 @@ A = [[-4, 6, 5, 4],
     [-3, -2, 4, 1],
     [-8, -3, 3, 2]]
 b = [20, 10, 20]
-simplex(C,A,b,eps_def,True)
+simplex(True, C, A, b)
 
 #third test
 print("\n=== THIRD TEST ===")
@@ -157,7 +159,7 @@ A = [[1, 2, 1],
     [3, 0, 2],
     [1, 4, 0]]
 b = [430, 460, 420]
-simplex(C,A,b,eps_def,True)
+simplex(True, C, A, b)
 
 # fourth test
 print("\n=== FOURTH TEST ===")
@@ -166,7 +168,7 @@ A=[ [18,15,12],
     [6,4,8],
     [5,3,3]]
 b=[360,192,180]
-simplex(C,A,b,eps_def,True)
+simplex(True, C, A, b)
 
 # fifth test
 print("\n=== FIFTH TEST ===")
@@ -175,4 +177,4 @@ A=[ [2,1,-2],
     [1,2,4],
     [1,-1,2]]
 b=[24,23,10]
-simplex(C, A, b, eps_def,False)
+simplex(False, C, A, b)
