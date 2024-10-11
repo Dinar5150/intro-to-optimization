@@ -1,4 +1,5 @@
-#while True: # Read a matrix until the epsilon is given
+# INPUT PROCESSOR BLOCK
+# while True: # Read a matrix until the epsilon is given
 #    inputVector = list(map(float, input().split()))
 #    A.append(inputVector)
 #    if len(inputVector) <= 1 and len(A) > 2: # "> 2" is here to make sure we don't confuse b with eps
@@ -8,26 +9,26 @@
 #        b = A.pop()
 #        break
 
-# Print the initial problem function
-def print_problem(C, A, b, flag):
+# Function to print the initial problem
+def print_problem(C, A, b, is_max_problem):
     # Target function line
-    print(f"{"max" if flag else "min"} z = ", end="")  # Target function line
-    print(f"{C[0]} * x1", end="")
+    print(f"{"max" if is_max_problem else "min"} z = ", end = "")  # Target function line
+    print(f"{C[0]} * x1", end = "")
     for i in range(1, len(C)):
-        print(f" {"+" if C[i] >= 0 else "-"} {abs(C[i])} * x{i + 1}", end="")
+        print(f" {"+" if C[i] >= 0 else "-"} {abs(C[i])} * x{i + 1}", end = "")
 
-    print("\nsubject to the constraints:", end="")  # Constraints lines
+    print("\nsubject to the constraints:", end = "")  # Constraints lines
     for i in range(len(A)):
-        print(f"\n - {A[i][0]} * x1", end="")
+        print(f"\n - {A[i][0]} * x1", end = "")
         for j in range(1, len(A[i])):
-            print(f" {"+" if A[i][j] >= 0 else "-"} {abs(A[i][j])} * x{j + 1}", end="")
-        print(f" <= {b[i]}", end="")
-    print("\n", end="")
+            print(f" {"+" if A[i][j] >= 0 else "-"} {abs(A[i][j])} * x{j + 1}", end = "")
+        print(f" <= {b[i]}", end = "")
+    print("\n", end = "")
 
 
 # Function to form a table
-def form_tableau(C,A,b,flag):
-    if flag:
+def form_tableau(C, A, b, is_max_problem):
+    if is_max_problem:
         tableau = [[-i for i in C]]
     else:
         tableau = [C[:]] # Copy C into tableau in order to avoid modifications to C
@@ -55,22 +56,22 @@ def check_dimension_correctness():
 
 # print_problem(True)
 
-def minimal(list):
-    min=0
-    for i in range(len(list)):
-        if list[i]<list[min]: min = i
-    if list[min]<0: return min
+def find_ind_of_min_neg(arr):
+    min_ind = 0
+    for i in range(len(arr)):
+        if arr[i] < arr[min_ind]: min_ind = i
+    if arr[min_ind] < 0: return min_ind
     else: return -1
 
-def relations(tableau, ind):
-    min = 10**20
-    out=0
+def ratios(tableau, ind):
+    min_value = float('inf')
+    out = 0
     for i in range(1,len(tableau)):
-        if tableau[i][ind]<=0: continue
+        if tableau[i][ind] <= 0: continue
         x=tableau[i][-1]/tableau[i][ind]
-        if 0 < x < min:
+        if 0 < x < min_value:
             out = i
-            min = x
+            min_value = x
     return out
 
 def iterate(tableau, en, out):
@@ -83,48 +84,49 @@ def iterate(tableau, en, out):
     for i in range(len(tableau[out])):
         tableau[out][i] = tableau[out][i] / k
 
-#def printTableau(tableau):
-#    print("\n--------------\n")
-#    for i in tableau:
-#        for j in i:
-#            print(j,end="\t")
-#        print("\n")
+def simplex(C, A, b, eps, is_max_problem):
+    # Print the initial problem
+    print_problem(C, A, b, is_max_problem)
 
-def simplex(C, A, b, eps, flag):
-    # printing problem
-    print_problem(C, A, b, flag)
-
-    # forming tableu
-    tableau=form_tableau(C, A, b, flag)
+    # Form the tableau for the simplex method
+    tableau = form_tableau(C, A, b, is_max_problem)
     ans=[0] * len(C)
 
-    # applying simplex
-    en = minimal(tableau[0])
-#    printTableau(tableau)
-    print("solver_state: ", end="")
-    while en != -1:
-        out = relations(tableau,en)
+    prev_value = float('inf')  # Initialize previous optimal value as infinity
+
+    # Apply the simplex method
+    entering_ind = find_ind_of_min_neg(tableau[0])
+    print("solver_state: ", end = "")
+    while entering_ind != -1:
+        out = ratios(tableau, entering_ind)
         if out in ans:
             for i in range(len(ans)):
-                if ans[i]==out:
-                    ans[i]=0
+                if ans[i] == out:
+                    ans[i] = 0
                     break
-        if 0 <= en < len(C): ans[en] = out
+        if 0 <= entering_ind < len(C): ans[entering_ind] = out
 
         if out == 0:
             print("unbounded")
-            return ["unbounded",[],[]]
+            return
         else:
-            iterate(tableau, en, out)
+            iterate(tableau, entering_ind, out)
 
-        en = minimal(tableau[0])
-#        printTableau(tableau)
-    if flag == False: tableau[0][-1]=-1*tableau[0][-1]
+        entering_ind = find_ind_of_min_neg(tableau[0])
 
-    # returning ans
+        # Check the difference in the objective function value
+        current_value = tableau[0][-1]
+        if abs(current_value - prev_value) < eps:
+            break  # Stop the iteration if difference is below eps
+
+        prev_value = current_value  # Update for next iteration
+
+    if not is_max_problem: tableau[0][-1] = -tableau[0][-1]
+
+    # Print the answer
     for i in range(len(ans)):
-        if ans[i]>0:
-            ans[i]=tableau[ans[i]][-1]
+        if ans[i] > 0:
+            ans[i] = tableau[ans[i]][-1]
     print("solved")
     print("x*:", ans)
     print("z:", tableau[0][-1])
