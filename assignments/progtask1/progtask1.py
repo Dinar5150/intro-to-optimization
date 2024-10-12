@@ -50,13 +50,15 @@ def form_tableau(C, A, b, is_max_problem):
     return tableau
 
 # Check the data on dimension correctness
-def check_dimension_correctness():
+def check_correctness():
     if len(A) != len(b): return False
     for i in A:
         if len(i) != len(C): return False
-    return True
 
-# print_problem(True)
+    for i in b:
+        if i < 0: return False
+
+    return True
 
 def find_ind_of_min_neg(arr):
     min_ind = 0
@@ -90,6 +92,10 @@ def simplex(is_max_problem, C, A, b, eps = EPS_DEF):
     # Print the initial problem
     print_problem(C, A, b, is_max_problem)
 
+    if not check_correctness():
+        print("Method not applicable!")
+        return
+
     # Form the tableau for the simplex method
     tableau = form_tableau(C, A, b, is_max_problem)
     ans = [0] * len(C)
@@ -116,7 +122,7 @@ def simplex(is_max_problem, C, A, b, eps = EPS_DEF):
 
         entering_ind = find_ind_of_min_neg(tableau[0])
 
-        # BLOCK TO CHECK THE EPS BETWEEN ITERATIONS AND BREAK IF NEEDED
+        # BLOCK TO CHECK THE EPS BETWEEN ITERATIONS AND BREAK IF NEEDED (DEGENERACY CHECK)
 
         # # Check the difference in the objective function value
         # current_value = tableau[0][-1]
