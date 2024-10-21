@@ -1,6 +1,7 @@
+import math
 import numpy as np
 
-EPS_DEF = 0.00001
+EPS_DEF = 0.001
 
 # Function to print the initial problem
 def print_problem(C, A, b, is_max_problem):
@@ -30,10 +31,8 @@ def check_correctness(C, A, b):
     return True
 
 def interior_point(is_max_problem, C, A, b, eps = EPS_DEF, x = None):
-    if (is_max_problem):
-        alpha = ALPHA
-    else:
-        alpha = -ALPHA
+    if  not is_max_problem:
+        C = [-i for i in C]
 
     # Print the initial problem
     if x is None:
@@ -52,20 +51,20 @@ def interior_point(is_max_problem, C, A, b, eps = EPS_DEF, x = None):
         if b[i] - s >= 0:
             x.append(b[i] - s)
         else:
+            print("The method is not applicable!")
             return
-            # TODO method not applicable
 
     C += [0] * len(A)
     C = np.array(C)
     A = np.array(A, float)
     A = np.hstack((A, np.eye(len(A)))) # Add identity matrix from the right to the A matrix
-    b = np.array(b, float)
     x = np.array(x, float)
-    D = np.diag(x)
 
-    c = 0
+    print("solver_state: ", end="")
 
     while True:
+        # This piece of code was taken from the lab example
+        v = x
         D = np.diag(x)
         AA = np.dot(A, D)
         cc = np.dot(D, C)
@@ -76,102 +75,65 @@ def interior_point(is_max_problem, C, A, b, eps = EPS_DEF, x = None):
         P = np.subtract(I, np.dot(H, AA))
         cp = np.dot(P, cc)
         nu = np.absolute(np.min(cp))
-        y = np.add(np.ones(len(C), float), (alpha / nu) * cp)
+
+        if math.isnan(nu):
+            print("unbounded")
+            return
+
+        y = np.add(np.ones(len(C), float), (ALPHA / nu) * cp)
         yy = np.dot(D, y)
+
         x = yy
 
-        print(x)
-        c += 1
-
-        if c == 5:
-            break
-
-        # At = np.dot(A, D)
-        # Ct = np.dot(D, C)
-        #
-        # P = np.subtract(
-        #     np.eye(len(C)),
-        #     np.dot(
-        #         np.transpose(At),
-        #         np.dot(
-        #             np.linalg.inv(
-        #                 np.dot(
-        #                     At,
-        #                     np.transpose(At))),
-        #             At)))
-        #
-        # c_p = np.dot(P, Ct)
-        # nu = np.absolute(np.min(c_p))
-        #
-        # x_new = np.add(np.array([1] * len(c_p), float), np.dot(alpha / nu, c_p))
-        # x_dif = np.linalg.norm(np.subtract(x_new, x))
-        #
-        # x = x_new
-
-        # print(x)
-
-        # if x_dif < EPS_DEF:
-        #     print(x)
-        #     return
+        if np.linalg.norm(np.subtract(yy, v)) < eps:
+            print("solved")
+            print(f"x*: [{', '.join(str(round(i / eps) * eps) for i in x[:-len(A)])}]")
+            print("z:", round(np.dot(C, x) / eps) * eps)
+            return
 
 def perform_tests():
-    C = [9, 10, 16]
-    A = [
-        [18, 15, 12],
-        [6, 4, 8],
-        [5, 3, 3]
-    ]
-    b = [360, 192, 180]
+    print(f"ALPHA = {ALPHA}", end = "\n\n")
+    print("=== FIRST TEST ===")
+    C = [2,1]
+    A = [[1,-1],
+         [2,0]]
+    b=[8,4]
+    interior_point(True, C, A,  b)
 
+    print("\n=== SECOND TEST ===")
+    C = [4, 1, 3, 5]
+    A = [[-4, 6, 5, 4],
+        [-3, -2, 4, 1],
+        [-8, -3, 3, 2]]
+    b = [20, 10, 20]
     interior_point(True, C, A, b)
 
-    # # first test
-    # print("=== FIRST TEST ===")
-    # C = [2,1]
-    # A = [[1,-1],
-    #      [2,0]]
-    # b=[8,4]
-    # interior_point(True, C, A,  b) # returns list [state(string), x*(array), z(float)]
-    #
-    # #second test
-    # print("\n=== SECOND TEST ===")
-    # C = [4, 1, 3, 5]
-    # A = [[-4, 6, 5, 4],
-    #     [-3, -2, 4, 1],
-    #     [-8, -3, 3, 2]]
-    # b = [20, 10, 20]
-    # interior_point(True, C, A, b)
-    #
-    # #third test
-    # print("\n=== THIRD TEST ===")
-    # C = [3, 2, 5]
-    # A = [[1, 2, 1],
-    #      [3, 0, 2],
-    #      [1, 4, 0]]
-    # b = [430, 460, 420]
-    # interior_point(True, C, A, b)
-    #
-    # # fourth test
-    # print("\n=== FOURTH TEST ===")
-    # C=[9,10,16]
-    # A=[ [18,15,12],
-    #     [6,4,8],
-    #     [5,3,3]]
-    # b=[360,192,180]
-    # interior_point(True, C, A, b)
-    #
-    # # fifth test
-    # print("\n=== FIFTH TEST ===")
-    # C = [-2,2,-6]
-    # A = [[2,1,-2],
-    #    [1,2,4],
-    #    [1,-1,2]]
-    # b = [24,23,10]
-    # interior_point(False, C, A, b)
+    print("\n=== THIRD TEST ===")
+    C = [3, 2, 5]
+    A = [[1, 2, 1],
+         [3, 0, 2],
+         [1, 4, 0]]
+    b = [430, 460, 420]
+    interior_point(True, C, A, b)
+
+    print("\n=== FOURTH TEST ===")
+    C=[9,10,16]
+    A=[ [18,15,12],
+        [6,4,8],
+        [5,3,3]]
+    b=[360,192,180]
+    interior_point(True, C, A, b)
+
+    print("\n=== FIFTH TEST ===")
+    C = [-2,2,-6]
+    A = [[2,1,-2],
+       [1,2,4],
+       [1,-1,2]]
+    b = [24,23,10]
+    interior_point(False, C, A, b)
 
 ALPHA = 0.5
 perform_tests()
-
+print()
 ALPHA = 0.9
 perform_tests()
-
