@@ -143,20 +143,22 @@ def simplex(is_max_problem, C, A, b, eps = EPS_DEF):
 
 # first test
 print("=== FIRST TEST ===")
-C=[2,1]
-A=[ [1,-1],
-    [2,0]]
-b=[8,4]
+C=[1,4]
+A=[ [2,1],
+    [3,5],
+    [1,3]]
+b=[3,9,5]
 simplex(True, C, A, b) # returns list [state(string), x*(array), z(float)]
 
 #second test
 print("\n=== SECOND TEST ===")
-C = [4, 1, 3, 5]
-A = [[-4, 6, 5, 4],
-    [-3, -2, 4, 1],
-    [-8, -3, 3, 2]]
-b = [20, 10, 20]
-simplex(True, C, A, b)
+C = [-4, 2]
+A = [
+    [6, 2],
+    [3,-2]
+    ]
+b = [18, 6]
+simplex(False, C, A, b)
 
 #third test
 print("\n=== THIRD TEST ===")
