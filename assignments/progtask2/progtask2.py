@@ -3,7 +3,7 @@ from itertools import combinations
 
 import numpy as np
 
-EPS_DEF = 0.0001
+EPS_DEF = 0.001
 
 # Function to print the initial problem
 def print_problem(C, A, b, is_max_problem):
@@ -100,8 +100,8 @@ def interior_point(is_max_problem, C, A, b, eps = EPS_DEF, x = None):
         cp = np.dot(P, cl)
         nu = np.absolute(np.min(cp))
 
-        if math.isnan(nu):
-            print("unbounded") # Actually, unbounded solutions are taken care of when we calculate initial BF solution.
+        if np.isinf(AlAlt).any():
+            print("unbounded (Problem doesn't have a solution!)") # Actually, unbounded solutions are taken care of when we calculate initial BF solution.
             return
 
         y = np.add(np.ones(len(C), float), (ALPHA / nu) * cp)
@@ -130,9 +130,7 @@ def perform_tests():
         [-3, -2, 4, 1],
         [-8, -3, 3, 2]]
     b = [20, 10, 20]
-    interior_point(True, C, A, b)
-
-    # [1, 1, 1, 1, 9, 10, 26]
+    interior_point(True, C, A, b, EPS_DEF, [1, 1, 1, 1, 9, 10, 26])
 
     print("\n=== THIRD TEST ===")
     C = [3, 2, 5]
