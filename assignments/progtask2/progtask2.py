@@ -77,7 +77,7 @@ def interior_point(is_max_problem, C, A, b, eps = EPS_DEF, x = None):
         x = generate_initial_point(A, b)
         for i in range(len(A[0]) - len(A)):
             if x[i] == 0:
-                print("Method not applicable!")
+                print("Problem doesn't have a solution!")
                 return
     else:
         if not np.array_equal(np.dot(A, x), b):
