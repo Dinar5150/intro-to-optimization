@@ -1,9 +1,8 @@
-import math
 from itertools import combinations
-
 import numpy as np
 
 EPS_DEF = 0.001
+CONV_TOL = 1e-8
 
 # Function to print the initial problem
 def print_problem(C, A, b, is_max_problem):
@@ -32,10 +31,11 @@ def check_correctness(C, A, b):
 
     return True
 
-def generate_initial_point(A, b):
+def generate_initial_point(C, A, b):
     initial_point = np.zeros(len(A[0]))
     feasible_border_points = 0
     rank = np.linalg.matrix_rank(A)
+
     for combination in combinations(range(len(A[0])), len(A[0]) - len(A)): # Generate pairs of what variables to put as 0
         A_sub = np.delete(A, list(combination), axis=1) # Remove the 0 coefficient columns
         if np.linalg.matrix_rank(A_sub) < rank: # Skip the singular matrix
@@ -74,10 +74,10 @@ def interior_point(is_max_problem, C, A, b, eps = EPS_DEF, x = None):
     A = np.hstack((A, np.eye(len(A)))) # Add identity matrix from the right to the A matrix
 
     if x is None:
-        x = generate_initial_point(A, b)
+        x = generate_initial_point(C, A, b)
         for i in range(len(A[0]) - len(A)):
             if x[i] == 0:
-                print("Method not applicable!")
+                print("solver_state: unbounded")
                 return
     else:
         if not np.array_equal(np.dot(A, x), b):
@@ -100,11 +100,13 @@ def interior_point(is_max_problem, C, A, b, eps = EPS_DEF, x = None):
         cp = np.dot(P, cl)
         nu = np.absolute(np.min(cp))
 
-        if np.isinf(AlAlt).any():
-            print("unbounded (Problem doesn't have a solution!)") # Actually, unbounded solutions are taken care of when we calculate initial BF solution.
+        y = np.add(np.ones(len(C), float), (ALPHA / nu) * cp)
+
+        y_dual = np.dot(AlAlt_inv, np.dot(A, C)) # Use dual feasibility test to tell whether the solution is unbounded
+        if (y_dual < CONV_TOL).all():
+            print("unbounded")
             return
 
-        y = np.add(np.ones(len(C), float), (ALPHA / nu) * cp)
         yy = np.dot(D, y)
 
         x = yy
