@@ -3,7 +3,7 @@ from itertools import combinations
 
 import numpy as np
 
-EPS_DEF = 0.001
+EPS_DEF = 0.0001
 
 # Function to print the initial problem
 def print_problem(C, A, b, is_max_problem):
@@ -35,16 +35,23 @@ def check_correctness(C, A, b):
 def generate_initial_point(A, b):
     initial_point = np.zeros(len(A[0]))
     feasible_border_points = 0
-    for combination in combinations(range(len(A[0])), len(A[0]) // 2): # Generate pairs of what variables to put as 0
-        A_sub = A[:, list(combination)] # Remove the 0 coefficient columns
-        if np.linalg.det(A_sub) == 0: # Skip the singular matrix
+    rank = np.linalg.matrix_rank(A)
+    for combination in combinations(range(len(A[0])), len(A[0]) - len(A)): # Generate pairs of what variables to put as 0
+        A_sub = np.delete(A, list(combination), axis=1) # Remove the 0 coefficient columns
+        if np.linalg.matrix_rank(A_sub) < rank: # Skip the singular matrix
             continue
-        x_sub = np.linalg.solve(A_sub, b) # Find solution for sub-matrix of A
+        try:
+            x_sub, residuals, rank_sub, s = np.linalg.lstsq(A_sub, b, rcond=None) # Find solution for sub-matrix of A
+        except Exception:
+            continue # Skip if cannot process
         x = np.zeros(len(A[0]))
-        for i, idx in enumerate(combination): # Reconstruct full x from sub-vector of x
-            if x_sub[i] < 0:
-                break
-            x[idx] = x_sub[i]
+        c = 0
+        for i in range(len(x)):
+            if i not in combination:
+                x[i] = x_sub[c]
+                if x[i] < 0:
+                    break
+                c += 1
         else:
             initial_point = np.add(initial_point, x) # Mean value from all the feasible points coordinates
             feasible_border_points += 1
@@ -68,6 +75,10 @@ def interior_point(is_max_problem, C, A, b, eps = EPS_DEF, x = None):
 
     if x is None:
         x = generate_initial_point(A, b)
+        for i in range(len(A[0]) - len(A)):
+            if x[i] == 0:
+                print("Method not applicable!")
+                return
     else:
         if not np.array_equal(np.dot(A, x), b):
             print("Method not applicable!")
@@ -90,7 +101,7 @@ def interior_point(is_max_problem, C, A, b, eps = EPS_DEF, x = None):
         nu = np.absolute(np.min(cp))
 
         if math.isnan(nu):
-            print("unbounded")
+            print("unbounded") # Actually, unbounded solutions are taken care of when we calculate initial BF solution.
             return
 
         y = np.add(np.ones(len(C), float), (ALPHA / nu) * cp)
@@ -111,7 +122,7 @@ def perform_tests():
     A = [[1,-1],
          [2,0]]
     b=[8,4]
-    interior_point(True, C, A,  b, 0.001, [1, 1, 8, 2])
+    interior_point(True, C, A, b)
 
     print("\n=== SECOND TEST ===")
     C = [4, 1, 3, 5]
@@ -120,6 +131,8 @@ def perform_tests():
         [-8, -3, 3, 2]]
     b = [20, 10, 20]
     interior_point(True, C, A, b)
+
+    # [1, 1, 1, 1, 9, 10, 26]
 
     print("\n=== THIRD TEST ===")
     C = [3, 2, 5]
