@@ -1,9 +1,8 @@
-import math
-from itertools import combinations
-
 import numpy as np
 
 EPS_DEF = 0.001
+CONV_TOL = 1e-8
+MAX_ITERS = 10**8
 
 # Function to print the initial problem
 def print_problem(C, A, b, is_max_problem):
@@ -32,30 +31,16 @@ def check_correctness(C, A, b):
 
     return True
 
-def generate_initial_point(A, b):
-    initial_point = np.zeros(len(A[0]))
-    feasible_border_points = 0
-    rank = np.linalg.matrix_rank(A)
-    for combination in combinations(range(len(A[0])), len(A[0]) - len(A)): # Generate pairs of what variables to put as 0
-        A_sub = np.delete(A, list(combination), axis=1) # Remove the 0 coefficient columns
-        if np.linalg.matrix_rank(A_sub) < rank: # Skip the singular matrix
-            continue
-        try:
-            x_sub, residuals, rank_sub, s = np.linalg.lstsq(A_sub, b, rcond=None) # Find solution for sub-matrix of A
-        except Exception:
-            continue # Skip if cannot process
-        x = np.zeros(len(A[0]))
-        c = 0
-        for i in range(len(x)):
-            if i not in combination:
-                x[i] = x_sub[c]
-                if x[i] < 0:
-                    break
-                c += 1
-        else:
-            initial_point = np.add(initial_point, x) # Mean value from all the feasible points coordinates
-            feasible_border_points += 1
-    return np.divide(initial_point, feasible_border_points)
+def generate_initial_point(A, b, eps = EPS_DEF):
+    slacks_offset = len(A[0]) - len(A)
+    for i in range(MAX_ITERS):
+        random_x = np.random.uniform(low = 0 + eps, high = 1 - eps, size = slacks_offset)
+        random_x = np.hstack((random_x, np.zeros(slacks_offset)))
+        offset = np.dot(A, random_x)
+        b_offset = np.subtract(b, offset)
+        x = np.hstack((random_x[:slacks_offset], b_offset))
+        if np.all(x > 0):
+            return x
 
 def interior_point(is_max_problem, C, A, b, eps = EPS_DEF, x = None):
     if not is_max_problem:
@@ -75,10 +60,6 @@ def interior_point(is_max_problem, C, A, b, eps = EPS_DEF, x = None):
 
     if x is None:
         x = generate_initial_point(A, b)
-        for i in range(len(A[0]) - len(A)):
-            if x[i] == 0:
-                print("Problem doesn't have a solution!")
-                return
     else:
         if not np.array_equal(np.dot(A, x), b):
             print("Method not applicable!")
@@ -94,17 +75,19 @@ def interior_point(is_max_problem, C, A, b, eps = EPS_DEF, x = None):
         cl = np.dot(D, C)
         I = np.eye(len(C))
         AlAlt = np.dot(Al, np.transpose(Al))
+
+        if np.any(AlAlt == float('inf')):
+            print("unbounded")
+            return
+
         AlAlt_inv = np.linalg.inv(AlAlt)
         Alt_AlAlt_inv = np.dot(np.transpose(Al), AlAlt_inv)
         P = np.subtract(I, np.dot(Alt_AlAlt_inv, Al))
         cp = np.dot(P, cl)
         nu = np.absolute(np.min(cp))
 
-        if np.isinf(AlAlt).any():
-            print("unbounded (Problem doesn't have a solution!)") # Actually, unbounded solutions are taken care of when we calculate initial BF solution.
-            return
-
         y = np.add(np.ones(len(C), float), (ALPHA / nu) * cp)
+
         yy = np.dot(D, y)
 
         x = yy
