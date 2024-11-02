@@ -101,19 +101,20 @@ def interior_point(is_max_problem, C, A, b, eps = EPS_DEF, x = None):
 def perform_tests():
     print(f"ALPHA = {ALPHA}", end = "\n\n")
     print("=== FIRST TEST ===")
-    C = [2,1]
-    A = [[1,-1],
-         [2,0]]
-    b=[8,4]
+    C = [1,4]
+    A = [[2,1],
+         [3,5],
+         [1,3]]
+    b=[3,9,5]
     interior_point(True, C, A, b)
 
     print("\n=== SECOND TEST ===")
-    C = [4, 1, 3, 5]
-    A = [[-4, 6, 5, 4],
-        [-3, -2, 4, 1],
-        [-8, -3, 3, 2]]
-    b = [20, 10, 20]
-    interior_point(True, C, A, b, EPS_DEF, [1, 1, 1, 1, 9, 10, 26])
+    C = [-4, 2]
+    A = [[6,2],
+        [3,-2]
+        ]
+    b = [18,6]
+    interior_point(False, C, A, b)
 
     print("\n=== THIRD TEST ===")
     C = [3, 2, 5]
