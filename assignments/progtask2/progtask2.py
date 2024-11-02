@@ -43,8 +43,6 @@ def generate_initial_point(A, b, eps = EPS_DEF):
             return x
 
 def interior_point(is_max_problem, C, A, b, eps = EPS_DEF, x = None):
-    if not is_max_problem:
-        C = [-i for i in C]
 
     # Print the initial problem
     print_problem(C, A, b, is_max_problem)
@@ -95,7 +93,12 @@ def interior_point(is_max_problem, C, A, b, eps = EPS_DEF, x = None):
         if np.linalg.norm(np.subtract(yy, v)) < eps:
             print("solved")
             print(f"x*: [{', '.join(str(round(i / eps) * eps) for i in x[:-len(A)])}]")
-            print("z:", round(np.dot(C, x) / eps) * eps)
+
+            res = np.dot(C, x)
+            if not is_max_problem:
+                res *= -1
+
+            print("z:", round(res / eps) * eps)
             return
 
 def perform_tests():
