@@ -92,13 +92,13 @@ def interior_point(is_max_problem, C, A, b, eps = EPS_DEF, x = None):
 
         if np.linalg.norm(np.subtract(yy, v)) < eps:
             print("solved")
-            print(f"x*: [{', '.join(str(round(i / eps) * eps) for i in x[:-len(A)])}]")
+            print(f"x*: [{', '.join(str(round(i, 3)) for i in x[:-len(A)])}]")
 
             res = np.dot(C, x)
             if not is_max_problem:
                 res *= -1
 
-            print("z:", round(res / eps) * eps)
+            print("z:", round(res, 3))
             return
 
 def perform_tests():
@@ -116,7 +116,7 @@ def perform_tests():
     A = [[6, 2],
          [3, -2]]
     b = [18, 6]
-    interior_point(True, C, A, b, EPS_DEF)
+    interior_point(False, C, A, b, EPS_DEF)
 
     print("\n=== THIRD TEST ===")
     C = [3, 2, 5]
