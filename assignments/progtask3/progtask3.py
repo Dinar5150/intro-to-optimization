@@ -88,6 +88,77 @@ def russel_alg(S, C, D):
 
     return allocation
 
+def vogel_alg(S, C, D):
+    # Create copies of the supply and demand lists to avoid altering the originals
+    supply = S[:]
+    demand = D[:]
+    allocations = []  # Store final allocations as [row, column, allocated_amount]
+
+    # Continue allocating until the total supply and demand are satisfied
+    while sum(supply) > 0 and sum(demand) > 0:
+        row_penalties = []
+        col_penalties = []
+
+        # Calculate penalties for each row based on cost differences
+        for i in range(len(supply)):
+            if supply[i] > 0:  # Only calculate penalty if there is remaining supply
+                # Gather available costs in this row (ignoring exhausted columns)
+                row_costs = sorted([C[i][j] for j in range(len(demand)) if demand[j] > 0])
+
+                # Calculate penalty as difference between two smallest costs, if possible
+                if len(row_costs) > 1:
+                    row_penalties.append((row_costs[1] - row_costs[0], i))  # Penalty = second smallest - smallest
+                elif len(row_costs) == 1:
+                    row_penalties.append((row_costs[0], i))  # Only one cost left; penalty is that cost itself
+
+        # Calculate penalties for each column based on cost differences
+        for j in range(len(demand)):
+            if demand[j] > 0:  # Only calculate penalty if there is remaining demand
+                # Gather available costs in this column (ignoring exhausted rows)
+                col_costs = sorted([C[i][j] for i in range(len(supply)) if supply[i] > 0])
+
+                # Calculate penalty as difference between two smallest costs, if possible
+                if len(col_costs) > 1:
+                    col_penalties.append((col_costs[1] - col_costs[0], j))  # Penalty = second smallest - smallest
+                elif len(col_costs) == 1:
+                    col_penalties.append((col_costs[0], j))  # Only one cost left; penalty is that cost itself
+
+        # Determine which has the higher penalty: a row or a column
+        max_row_penalty = max(row_penalties, key=lambda x: x[0]) if row_penalties else None
+        max_col_penalty = max(col_penalties, key=lambda x: x[0]) if col_penalties else None
+
+        # Compare penalties to decide whether to allocate based on a row or column
+        if max_row_penalty and max_col_penalty:
+            if max_row_penalty[0] >= max_col_penalty[0]:
+                # Higher penalty row found; select the cell with the lowest cost in this row
+                i = max_row_penalty[1]
+                j = min(range(len(demand)), key=lambda x: C[i][x] if demand[x] > 0 else float('inf'))
+            else:
+                # Higher penalty column found; select the cell with the lowest cost in this column
+                j = max_col_penalty[1]
+                i = min(range(len(supply)), key=lambda x: C[x][j] if supply[x] > 0 else float('inf'))
+        elif max_row_penalty:
+            # Only row penalties available; allocate based on this row
+            i = max_row_penalty[1]
+            j = min(range(len(demand)), key=lambda x: C[i][x] if demand[x] > 0 else float('inf'))
+        elif max_col_penalty:
+            # Only column penalties available; allocate based on this column
+            j = max_col_penalty[1]
+            i = min(range(len(supply)), key=lambda x: C[x][j] if supply[x] > 0 else float('inf'))
+        else:
+            continue
+
+        # Allocate as much as possible to the selected cell
+        allocation_amount = min(supply[i], demand[j])
+        allocations.append([j + 1, i + 1, allocation_amount])
+
+        # Adjust remaining supply and demand
+        supply[i] -= allocation_amount
+        demand[j] -= allocation_amount
+
+    return allocations
+
+
 # Example data
 S = [10, 20, 40]
 D = [5, 15, 30, 20]
@@ -105,4 +176,8 @@ if check_problem(S, D):
     print()
     print("RUSSEL:")
     ans = russel_alg(S, C, D)
+    print_solution(ans)
+    print()
+    print("VOGEL:")
+    ans = vogel_alg(S, C, D)
     print_solution(ans)
