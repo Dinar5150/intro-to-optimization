@@ -158,26 +158,41 @@ def vogel_alg(S, C, D):
 
     return allocations
 
+def test(n):
+    name="test"+str(n)+".txt"
+    S=[]
+    C=[]
+    D=[]
+    f=open(name,'r')
+    line=f.readline()
+    line=line.split(' ')
+    for i in line:
+        S.append(int(i))
+    for i in range(3):
+        line=f.readline()
+        line=line.split(' ')
+        C.append([])
+        for j in range(len(line)):
+            C[i].append(int(line[j]))
+    line=f.readline()
+    line=line.split(' ')
+    for i in line:
+        D.append(int(i))
+    f.close()
+    print_problem(S, C, D)
+    if check_problem(S, D):
+        print()
+        print("NORTH-WEST:")
+        ans = north_west_alg(S, C, D)
+        print_solution(ans)
+        print()
+        print("RUSSEL:")
+        ans = russel_alg(S, C, D)
+        print_solution(ans)
+        print()
+        print("VOGEL:")
+        ans = vogel_alg(S, C, D)
+        print_solution(ans)
 
-# Example data
-S = [10, 20, 40]
-D = [5, 15, 30, 20]
-C = [[1, 4, 2, 8],
-     [9, 3, 7, 1],
-     [6, 2, 5, 9]]
-
-# Execute the functions
-print_problem(S, C, D)
-if check_problem(S, D):
-    print()
-    print("NORTH-WEST:")
-    ans = north_west_alg(S, C, D)
-    print_solution(ans)
-    print()
-    print("RUSSEL:")
-    ans = russel_alg(S, C, D)
-    print_solution(ans)
-    print()
-    print("VOGEL:")
-    ans = vogel_alg(S, C, D)
-    print_solution(ans)
+for i in range(5):
+    test(i+1)
