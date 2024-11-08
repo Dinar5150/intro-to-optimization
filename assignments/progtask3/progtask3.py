@@ -80,7 +80,7 @@ def russel_alg(S, C, D):
         # Allocate the minimum of supply or demand for the selected cell
         if i_new is not None and j_new is not None:
             allocation_value = min(supply[i_new], demand[j_new])
-            allocation.append([j_new + 1, i_new + 1, allocation_value])
+            allocation.append([i_new + 1, j_new + 1, allocation_value])
 
             # Update supply and demand
             supply[i_new] -= allocation_value
@@ -150,7 +150,7 @@ def vogel_alg(S, C, D):
 
         # Allocate as much as possible to the selected cell
         allocation_amount = min(supply[i], demand[j])
-        allocations.append([j + 1, i + 1, allocation_amount])
+        allocations.append([i + 1, j + 1, allocation_amount])
 
         # Adjust remaining supply and demand
         supply[i] -= allocation_amount
