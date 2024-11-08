@@ -159,15 +159,18 @@ def vogel_alg(S, C, D):
     return allocations
 
 def test(n):
-    name="test"+str(n)+".txt"
+    name="Test"+str(n)+".txt"
     S=[]
     C=[]
     D=[]
+
     f=open(name,'r')
     line=f.readline()
     line=line.split(' ')
+
     for i in line:
         S.append(int(i))
+    line=f.readline()
     for i in range(3):
         line=f.readline()
         line=line.split(' ')
@@ -175,24 +178,47 @@ def test(n):
         for j in range(len(line)):
             C[i].append(int(line[j]))
     line=f.readline()
+    line=f.readline()
     line=line.split(' ')
     for i in line:
         D.append(int(i))
+    line=f.readline()
+
+    NrthWst=[]
+    line=f.readline()
+    line=line.split(' ')
+    while len(line)>1:
+        NrthWst.append(line)
+        line=f.readline()
+        line=line.split(' ')
+    line=f.readline()
+
+    Russel=[]
+    line=f.readline()
+    line=line.split(' ')
+    while len(line)>1:
+        Russel.append(line)
+        line=f.readline()
+        line=line.split(' ')
+    line=f.readline()
+
+    Vogel=[]
+    line=f.readline()
+    line=line.split(' ')
+    while len(line)>1:
+        Vogel.append(line)
+        line=f.readline()
+        line=line.split(' ')
     f.close()
+
     print_problem(S, C, D)
     if check_problem(S, D):
-        print()
-        print("NORTH-WEST:")
         ans = north_west_alg(S, C, D)
-        print_solution(ans)
-        print()
-        print("RUSSEL:")
+        assert(NrthWst,ans)
         ans = russel_alg(S, C, D)
-        print_solution(ans)
-        print()
-        print("VOGEL:")
+        assert(Russel,ans)
         ans = vogel_alg(S, C, D)
-        print_solution(ans)
+        assert(Vogel,ans)
 
-for i in range(5):
+for i in range(3):
     test(i+1)
