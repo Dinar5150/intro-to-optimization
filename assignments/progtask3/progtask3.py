@@ -163,14 +163,11 @@ def test(n):
     S=[]
     C=[]
     D=[]
-
     f=open(name,'r')
     line=f.readline()
     line=line.split(' ')
-
     for i in line:
         S.append(int(i))
-    line=f.readline()
     for i in range(3):
         line=f.readline()
         line=line.split(' ')
@@ -178,47 +175,27 @@ def test(n):
         for j in range(len(line)):
             C[i].append(int(line[j]))
     line=f.readline()
-    line=f.readline()
     line=line.split(' ')
     for i in line:
         D.append(int(i))
-    line=f.readline()
-
-    NrthWst=[]
-    line=f.readline()
-    line=line.split(' ')
-    while len(line)>1:
-        NrthWst.append(line)
-        line=f.readline()
-        line=line.split(' ')
-    line=f.readline()
-
-    Russel=[]
-    line=f.readline()
-    line=line.split(' ')
-    while len(line)>1:
-        Russel.append(line)
-        line=f.readline()
-        line=line.split(' ')
-    line=f.readline()
-
-    Vogel=[]
-    line=f.readline()
-    line=line.split(' ')
-    while len(line)>1:
-        Vogel.append(line)
-        line=f.readline()
-        line=line.split(' ')
     f.close()
-
+    print()
+    print()
+    print("Test "+str(n))
     print_problem(S, C, D)
     if check_problem(S, D):
+        print()
+        print("NORTH-WEST:")
         ans = north_west_alg(S, C, D)
-        assert(NrthWst,ans)
+        print_solution(ans)
+        print()
+        print("RUSSEL:")
         ans = russel_alg(S, C, D)
-        assert(Russel,ans)
+        print_solution(ans)
+        print()
+        print("VOGEL:")
         ans = vogel_alg(S, C, D)
-        assert(Vogel,ans)
+        print_solution(ans)
 
 for i in range(3):
     test(i+1)
