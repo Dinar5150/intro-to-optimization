@@ -64,11 +64,11 @@ def russel_alg(S, C, D):
         row_max = [max(costs) if supply[i] > 0 else float('-inf') for i, costs in enumerate(C)]
         col_max = [max([C[i][j] for i in range(len(supply))]) if demand[j] > 0 else float('-inf') for j in range(len(demand))]
 
-        # Initialize the most negative opportunity cost
+        # Initialize the most negative delta cost
         most_neg = float('inf')
         i_new, j_new = None, None
 
-        # Find the cell with the most negative opportunity cost
+        # Find the cell with the most negative delta cost
         for i in range(len(supply)):
             for j in range(len(demand)):
                 if supply[i] > 0 and demand[j] > 0:  # Only consider cells where supply and demand are positive
